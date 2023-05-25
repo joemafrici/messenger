@@ -17,11 +17,18 @@
 #define handle_error(msg) \
     do { perror(msg); exit(EXIT_FAILURE); } while (0)
 //***********************************************
+void setup();
+//***********************************************
 int main()
 {
     int sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd == -1) handle_error("socket");
 
+    // set socket options
+    int opt = 1;
+    if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt)) == -1)
+        handle_error("setsockopt");
+    
     struct sockaddr_in my_addr, client_addr;
     socklen_t client_addr_size;
     memset(&my_addr, 0, sizeof(my_addr));
@@ -35,6 +42,7 @@ int main()
 
     if (listen(sockfd, BACKLOG) == -1) handle_error("listen");
 
+    printf("Server listening at http://localhost:%d\n", PORT_NUMBER);
     client_addr_size = sizeof(client_addr);
     int clientfd = accept(sockfd, (struct sockaddr *)&client_addr,
             &client_addr_size);
