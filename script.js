@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", function() {
         headers: {
             "Content-Type": "application/x-www-form-urlencoded"
         },
-        body: "message=" + encodedURIComponent(message)
+        body: "message=" + encodeURIComponent(message)
     })
     .then(function(response) {
         // Handle the response from the C server
