@@ -48,15 +48,17 @@ int main()
             &client_addr_size);
     if (clientfd == -1) handle_error("accept");
 
-    char recv_msg[1024];
-    if (read(clientfd, (void*)recv_msg, sizeof(recv_msg)) == -1)
-        handle_error("read");
-    printf("%s\n", recv_msg);
-
+    while (1)
+    {
+        char recv_msg[1024];
+        if (read(clientfd, (void*)recv_msg, sizeof(recv_msg)) == -1)
+            handle_error("read");
+        printf("%s\n", recv_msg);
+    }
+    
     char response[] = "Hello to you too";
-    if (write(clientfd, (void*)response, sizeof(response)) == -1)
-        handle_error("write");
-
+        if (write(clientfd, (void*)response, sizeof(response)) == -1)
+            handle_error("write");
 
     close(clientfd);
 
