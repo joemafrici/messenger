@@ -33,6 +33,7 @@ int main()
     socklen_t client_addr_size;
     memset(&my_addr, 0, sizeof(my_addr));
     memset(&client_addr, 0, sizeof(client_addr));
+
     my_addr.sin_family = AF_INET;
     my_addr.sin_port = htons(PORT_NUMBER);
     my_addr.sin_addr.s_addr = htonl(INADDR_ANY); //TODO: going to need a static
@@ -48,16 +49,20 @@ int main()
             &client_addr_size);
     if (clientfd == -1) handle_error("accept");
 
-    while (1)
-    {
-        char recv_msg[1024];
-        if (read(clientfd, (void*)recv_msg, sizeof(recv_msg)) == -1)
-            handle_error("read");
-        printf("%s\n", recv_msg);
-    }
+    char recv_msg[1024];
+    size_t num_bytes = read(clientfd, (void*)recv_msg, sizeof(recv_msg) -1 );
+    if ( num_bytes == -1) handle_error("read");
+    recv_msg[num_bytes] = '\0';
+    printf("%s\n", recv_msg);
     
-    char response[] = "Hello to you too";
-        if (write(clientfd, (void*)response, sizeof(response)) == -1)
+    char response[] = "HTTP/1.1 200 OK\r\n"
+                        "Content-Type: text/plain\r\n"
+                        "Content-Length: 13\r\n"
+                        "Access-Control-Allow-Origin: *\r\n"
+                        "\r\n"
+                        "Hello, client!";
+    printf("Sending response:\t%s\n", response);
+        if (write(clientfd, (void*)response, sizeof(response) -1 ) == -1)
             handle_error("write");
 
     close(clientfd);
