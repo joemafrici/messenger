@@ -1,16 +1,28 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Message Form</title>
-    </head>
-    <body>
-        <h1>Mesage Form</h1>
-        <form id="messageForm" action="/submit" method="POST">
+
+<head>
+    <title>Message Form</title>
+</head>
+
+<body>
+    <h1>Mesage Form</h1>
+    <form id="messageForm" action="/submit" method="POST">
         <label for="message">Message:</label>
         <input type="text" id="message" name="message" required>
         <button type="submit">Send</button>
-        </form>
+    </form>
 
-        <script src="script.js"></script>
-    </body>
+    <h1>Login</h1>
+    <form id="loginForm" action="/submit" method="POST">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+        <button type="submit">Login</button>
+    </form>
+
+    <script src="script.js"></script>
+</body>
+
 </html>

@@ -6,3 +6,6 @@ Use TCP
 
 SO_REUSEPORT
 https://lwn.net/Articles/542629/
+
+parse http request
+https://codereview.stackexchange.com/questions/188384/http-request-parser-in-c
