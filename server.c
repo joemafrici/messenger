@@ -92,6 +92,7 @@ int main()
     if (num_bytes == -1)
         handle_error("read");
     recv_msg[num_bytes] = '\0';
+    printf("%s\n", recv_msg);
     parse_request(recv_msg);
 
     char response[] = "HTTP/1.1 200 OK\r\n"
@@ -138,6 +139,7 @@ Request *parse_request(const char *raw)
     request->startline.version = (char *)malloc(strlen(token));
     strcpy(request->startline.version, token);
 
+    // Headers
     request->headers = (Header *)malloc(sizeof(Header));
     token = strtok(NULL, ":");
     request->headers->name = (char *)malloc(strlen(token));
@@ -147,5 +149,20 @@ Request *parse_request(const char *raw)
     request->headers->value = (char *)malloc(strlen(token));
     strcpy(request->headers->value, token);
     printf("name: %s\nvalue: %s\n", request->headers->name, request->headers->value);
-    return request;
+    Header *travel = request->headers;
+    while ((token = strtok(NULL, ":\n")))
+    {
+        travel->next = (Header *)malloc(sizeof(Header));
+        travel = travel->next;
+
+        travel->name = (char *)malloc(strlen(token));
+        strcpy(travel->name, token);
+
+        token = strtok(NULL, "\n");
+        travel->value = (char *)malloc(strlen(token));
+        strcpy(travel->value, token);
+        printf("Header:\tname: %s\tvalue: %s\n", travel->name, travel->value);
+    }
+
+        return request;
 }
