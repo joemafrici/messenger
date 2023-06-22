@@ -53,6 +53,7 @@ typedef struct Request
 //***********************************************
 void setup();
 Request *parse_request(const char *raw);
+void parse_body(const char *body);
 //***********************************************
 int main()
 {
@@ -152,17 +153,34 @@ Request *parse_request(const char *raw)
     Header *travel = request->headers;
     while ((token = strtok(NULL, ":\n")))
     {
-        travel->next = (Header *)malloc(sizeof(Header));
-        travel = travel->next;
+        if (strcmp(token, "\r") == 0)
+        {
+            // done with header section
+            break;
+        }
+        else
+        {
+            travel->next = (Header *)malloc(sizeof(Header));
+            travel = travel->next;
 
-        travel->name = (char *)malloc(strlen(token));
-        strcpy(travel->name, token);
+            travel->name = (char *)malloc(strlen(token));
+            strcpy(travel->name, token);
 
-        token = strtok(NULL, "\n");
-        travel->value = (char *)malloc(strlen(token));
-        strcpy(travel->value, token);
-        printf("Header:\tname: %s\tvalue: %s\n", travel->name, travel->value);
+            token = strtok(NULL, "\n");
+            travel->value = (char *)malloc(strlen(token));
+            strcpy(travel->value, token);
+            printf("Header:\tname: %s\tvalue: %s\n", travel->name, travel->value);
+        }
     }
 
-        return request;
+    // Body
+    token = strtok(NULL, "\n");
+    request->body = (char *)malloc(sizeof(strlen(token)));
+    strcpy(request->body, token);
+    parse_body(request->body);
+    return request;
+}
+
+void parse_body(const char *body)
+{
 }
