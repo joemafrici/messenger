@@ -23,8 +23,8 @@
 
 typedef struct User
 {
-    char username[1024];
-    char password[1024];
+    char *username;
+    char *password;
 } User;
 
 typedef enum Method
@@ -53,7 +53,7 @@ typedef struct Request
 //***********************************************
 void setup();
 Request *parse_request(const char *raw);
-void parse_body(const char *body);
+User *parse_body(const char *body);
 //***********************************************
 int main()
 {
@@ -111,7 +111,8 @@ int main()
     close(sockfd);
     return EXIT_SUCCESS;
 }
-
+//***********************************************
+// TODO: clean up memory leaks
 Request *parse_request(const char *raw)
 {
     Request *request = NULL;
@@ -149,7 +150,6 @@ Request *parse_request(const char *raw)
     token = strtok(NULL, "\n");
     request->headers->value = (char *)malloc(strlen(token));
     strcpy(request->headers->value, token);
-    printf("name: %s\nvalue: %s\n", request->headers->name, request->headers->value);
     Header *travel = request->headers;
     while ((token = strtok(NULL, ":\n")))
     {
@@ -169,18 +169,48 @@ Request *parse_request(const char *raw)
             token = strtok(NULL, "\n");
             travel->value = (char *)malloc(strlen(token));
             strcpy(travel->value, token);
-            printf("Header:\tname: %s\tvalue: %s\n", travel->name, travel->value);
         }
     }
 
     // Body
     token = strtok(NULL, "\n");
-    request->body = (char *)malloc(sizeof(strlen(token)));
+    request->body = (char *)malloc(strlen(token));
     strcpy(request->body, token);
     parse_body(request->body);
     return request;
 }
-
-void parse_body(const char *body)
+//***********************************************
+User *parse_body(const char *raw)
 {
+    char *body = (char *)malloc(strlen(raw) + 1);
+    if (body == NULL)
+        handle_error("malloc");
+    strcpy(body, raw);
+
+    char *username = NULL;
+    char *password = NULL;
+    char *token = strtok(body, " ");
+    while (token != NULL)
+    {
+        if (strncmp(token, "username=", strlen("username=")) == 0)
+        {
+            username = strdup(token + strlen("username="));
+        }
+        else if (strncmp(token, "password=", strlen("password=")) == 0)
+        {
+            password = strdup(token + strlen("password="));
+        }
+        token = strtok(NULL, " ");
+    }
+
+    User *usr = (User *)malloc(sizeof(User));
+    usr->username = (char *)malloc(strlen(username));
+    usr->password = (char *)malloc(strlen(password));
+    strcpy(usr->username, username);
+    strcpy(usr->password, password);
+    printf("username is: %s\npassword is: %s\n", usr->username, usr->password);
+    free(username);
+    free(password);
+    free(body);
+    return usr;
 }

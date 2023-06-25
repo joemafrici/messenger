@@ -4,7 +4,7 @@
 #
 EXECS = server
 CC = gcc
-CFLAGS = -g -Wall -Werror -O0 -std=c17
+CFLAGS = -g -Wall -Werror -O0 -std=c17 -D_POSIX_C_SOURCE=200809L
 OBJS = server.o \
 
 all: $(EXECS)
