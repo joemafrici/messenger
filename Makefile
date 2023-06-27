@@ -4,13 +4,13 @@
 #
 EXECS = server
 CC = gcc
-CFLAGS = -g -Wall -Werror -O0 -std=c17 -D_POSIX_C_SOURCE=200809L
+CFLAGS = -g -Wall -Werror -Wpedantic -O0 -std=c17 -D_POSIX_C_SOURCE=200809L 
 OBJS = server.o \
 
 all: $(EXECS)
 
 server: $(OBJS)
-	$(CC) -o server $(OBJS)
+	$(CC) $(CFLAGS) -o server $(OBJS) -lsqlite3
 
 .c.o:
 	$(CC) $(CFLAGS) -c $? -o $@
