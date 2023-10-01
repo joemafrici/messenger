@@ -15,19 +15,26 @@ document.addEventListener("DOMContentLoaded", function () {
             body: "username=" + encodeURIComponent(username) + " password=" + encodeURIComponent(password)
         })
             .then(function (response) {
+                console.log(response);
                 if (response.ok) {
                     console.log("Username and password sent successfully");
                     return response.text();
                 } else {
+                    const responseContainer = document.getElementById('responseContainer');
+                    responseContainer.classList.add('error');
                     console.error("Error:", response.statusText);
                     throw new Error("Request failed");
                 }
             })
             .then(function (responseText) {
                 console.log("Server response:", responseText);
+                const responseContainer = document.getElementById('responseContainer');
+                responseContainer.textContent = responseText;
             })
             .catch(function (error) {
                 console.error("Error:", error);
+                const responseContainer = document.getElementById('responseContainer');
+                responseContainer.textContent = error;
             })
     })
     form.addEventListener("submit", function (event) {

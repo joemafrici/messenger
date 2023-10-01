@@ -80,29 +80,58 @@ int main()
     size_t num_bytes = read(clientfd, (void *)recv_msg, sizeof(recv_msg) - 1);
     if (num_bytes == -1)
         handle_error("read");
-    recv_msg[num_bytes] = '\0';
-    printf("%s\n", recv_msg);
+    // recv_msg[num_bytes] = '\0';
+    //  printf("%s\n", recv_msg);
 
     Request *request = parse_request(recv_msg);
 
     User *login_user = parse_body(request->body);
     // TODO: validate user login
     if (validate_login(dbase_conn, login_user))
+    {
         printf("%s logged in\n", login_user->username);
+        char response[1024];
+        sprintf(response, "HTTP/1.1 200 OK\r\n"
+                          "Content-Type: text/plain\r\n"
+                          "Content-Length: %ld\r\n"
+                          "Access-Control-Allow-Origin: *\r\n"
+                          "\r\n"
+                          "user logged in",
+                strlen("user logged in"));
 
+        if (write(clientfd, (void *)response, sizeof(response) - 1) == -1)
+            handle_error("write");
+    }
+    else
+    {
+        printf("%s login failed - incorrect password\n", login_user->username);
+        char response[1024];
+        sprintf(response, "HTTP/1.1 404 NOT FOUND\r\n"
+                          "Content-Type: text/plain\r\n"
+                          "Content-Length: %ld\r\n"
+                          "Access-Control-Allow-Origin: *\r\n"
+                          "\r\n"
+                          "login failed - username or password",
+                strlen("login failed - incorrect username or password"));
+
+        if (write(clientfd, (void *)response, sizeof(response) - 1) == -1)
+            handle_error("write");
+    }
+
+    /*
     char response[] = "HTTP/1.1 200 OK\r\n"
                       "Content-Type: text/plain\r\n"
                       "Content-Length: 13\r\n"
                       "Access-Control-Allow-Origin: *\r\n"
                       "\r\n"
                       "Hello, client!";
-    // printf("Sending response:\t%s\n", response);
-    if (write(clientfd, (void *)response, sizeof(response) - 1) == -1)
-        handle_error("write");
+
+    */
 
     close(clientfd);
 
     close(sockfd);
+    sqlite3_close_v2(dbase_conn);
     return EXIT_SUCCESS;
 }
 //***********************************************
@@ -123,15 +152,16 @@ bool validate_login(sqlite3 *conn, User *user)
     int step_result = sqlite3_step(stmt);
     if (step_result == SQLITE_ROW)
     {
-        const unsigned char *password = sqlite3_column_text(stmt, 0);
+        // const unsigned char *password = sqlite3_column_text(stmt, 0);
+        const char *password = (const char *)sqlite3_column_text(stmt, 0);
         printf("Password from dbase: %s\n", password);
-        /*
-         if (strcmp(user->password, password) == 0)
+        if (strcmp(user->password, password) == 0)
             return true;
-
-        */
     }
+    else
+        handle_error(sqlite3_errmsg(conn));
 
+    sqlite3_finalize(stmt);
     return false;
 }
 //***********************************************
